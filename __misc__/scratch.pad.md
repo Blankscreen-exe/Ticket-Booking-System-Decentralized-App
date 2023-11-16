@@ -8,3 +8,19 @@ EM.updateEvent(1, "https://trufflesuite.com/assets/logo.png", "truffle.org", "tr
 
 paymentAmount = web3.utils.toWei("0.000000000000000055", "ether"); 
 await EM.payForEvent(eventId, { value: paymentAmount_1, from: "0x1C884c5F18e7DC213CCa533e689361B1679a834a" })
+
+
+TODO:
+
+## Get the transaction hash out of payment for an event ticket
+
+```js
+// Assuming you have a method to pay for an event
+const payForEventTransaction = await EM.methods.payForEvent(_eventId).send({
+    from: customerAddress,
+    value: web3.utils.toWei(ticketPrice.toString(), 'ether'),
+});
+
+const transactionHash = payForEventTransaction.transactionHash;
+console.log("Transaction Hash:", transactionHash);
+```
