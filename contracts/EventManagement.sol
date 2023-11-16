@@ -4,6 +4,7 @@ pragma solidity ^0.8.11;
 contract EventManagement {
     // website owner public address
     address payable serviceProviderWallet;
+    uint256 serviceProviderTotalAccumulatedFee = 0;
 
     // percentage cut given to service provider
     uint middlemanCutPercentage = 20; // 20% cut given to middleman
@@ -224,8 +225,18 @@ contract EventManagement {
         // create an event for giving service provider his cut
         emit EventCutGivenToServiceProvider(_eventId, serviceProviderCut);
 
+        serviceProviderTotalAccumulatedFee += calculateMiddlemanFee(msg.value);
+
         // Add the participant to the list
         paidEvent.participants.push(customerPublicAddress);
+    }
+
+    function getServiceProviderTotalAccumulatedFee() 
+        internal 
+        view 
+        returns (uint256) 
+    {
+        return serviceProviderTotalAccumulatedFee;
     }
 
     // ===================== HELPERS =====================
