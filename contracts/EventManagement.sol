@@ -56,6 +56,24 @@ contract EventManagement {
     constructor() {
         //set the deployer as the service provider
         serviceProviderWallet = payable(msg.sender); 
+
+        // Event storage newEvent = events[0];
+        // newEvent.id = 0;
+        // newEvent.img_url = "https://trufflesuite.com/assets/logo.png";
+        // newEvent.title = "Web3 Service Start";
+        // newEvent.description = "Commemoration Event";
+        // newEvent.is_active = false;
+        // newEvent.ticket_price = 0;
+        // newEvent.organizer = payable(msg.sender);
+        // newEvent.datetime = getTodayUnixTimestamp();
+
+        // emit EventAdded(0);
+    }
+
+    // Solidity code to get today's datetime in Unix timestamp format
+    function getTodayUnixTimestamp() public view returns (uint256) {
+        // Get the current timestamp in seconds
+        return block.timestamp;
     }
 
     function getServiceProviderWallet() 
