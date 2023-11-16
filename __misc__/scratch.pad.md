@@ -1,7 +1,7 @@
 # Testing inside console
 
 EM = await EventManagement.deployed()
-EM.addEvent(1, "https://trufflesuite.com/assets/logo.png", "truffle ORG", "truffle all things", true, 60, 0xC26e0A426fdC771CfF5F410AbDF07f4c12Ef6dE2)
+EM.addEvent(1, "https://trufflesuite.com/assets/logo.png", "truffle ORG", "truffle all things", true, 60, 999999900009, '0xC26e0A426fdC771CfF5F410AbDF07f4c12Ef6dE2')
 event = await EM.events(1)
 event = await EM.getEventDetails(1)
 EM.updateEvent(1, "https://trufflesuite.com/assets/logo.png", "truffle.org", "truffle all things", true, 60)
