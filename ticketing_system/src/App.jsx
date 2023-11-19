@@ -8,7 +8,8 @@ function App() {
 
   return (
     <>
-      <AddEventForm/>
+      <Home/>
+      {/* <AddEventForm/> */}
     </>
   )
 }
