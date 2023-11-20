@@ -8,7 +8,7 @@ This application hosts three different entities as far as payment is concerned:
 - **Site Owner/Middle Man**: The one who owns the site and provides a gateway for Organizers and participants to connect.
 - **Participants**: The one who pays for the event ticket in order to attend it.
 
-> By default the Middle Man is set to have 20% share rom every ticket sold but that setting can be changed from within the smart contract named as `EventManagement.sol`.
+> By default the Middle Man is set to have 20% share from every ticket sold but that setting can be changed from within the smart contract named as `EventManagement.sol`. Smart contract is itself explained in detail in the [contracts/EventManagement.md](/contracts/EventManagement.md)
 
 ## Technologies
 
@@ -17,6 +17,7 @@ This application hosts three different entities as far as payment is concerned:
 - vite.js `4.4.5`
 - web3.js `4.2.2`
 - truffle `5.11.5`
+- npm `8.19.4`
 
 ## Installation
 
