@@ -37,7 +37,7 @@ function EventForm(props) {
       };
 
     return (
-        <>
+        <div style={{backgroundColor: "aliceblue", padding:"10px", borderRadius: "7px", border: "3px solid lightblue"}}>
             <h2>Event Submission Form</h2>
             <Form onClick={(e) => {e.preventDefault();console.log(e.target.value); handleSubmit(e)} }>
                 <Form.Group className="mb-3" controlId="formEventId" onChange={(e) => handleInputChange(e)}>
@@ -88,7 +88,7 @@ function EventForm(props) {
                     Submit Event
                 </Button>
             </Form>
-        </>
+        </div>
     )
 }
 
