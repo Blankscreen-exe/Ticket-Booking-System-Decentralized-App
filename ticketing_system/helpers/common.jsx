@@ -32,3 +32,29 @@ export const convertTimestampToDate = (timestamp) => {
     return dateString;
   };
   
+export const appLogger = (msg = "", data = "") => {
+  // Create a new Error object to capture the call stack
+  const error = new Error();
+
+  // Extract the stack trace information
+  const stackTrace = error.stack?.split('\n').slice(2).join('\n'); // Remove the first two lines
+
+  console.log(
+    `%c=== ${msg} ===`,
+    "color:red; font-weight:bold; font-size:12px"
+  );
+  // Array.isArray(data) || JSON.isObject(data)
+  // ? console.log(
+  //   `%c=== ${{...data}} ===`,
+  //   "color:red; font-weight:bold; font-size:12px"
+  //  )
+  // : console.log(
+  //   `%c=== ${data} ===`,
+  //   "color:red; font-weight:bold; font-size:12px"
+  //  )
+   console.log(
+    `%c=== ${data} ===`,
+    "color:red; font-weight:bold; font-size:12px"
+   )
+  console.log("stack trace", stackTrace);
+}

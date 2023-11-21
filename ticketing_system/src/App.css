@@ -40,3 +40,18 @@
 .read-the-docs {
   color: #888;
 }
+
+
+/* =================================== */
+
+.text-orange {
+  color: orangered;
+}
+
+.text-orange:hover {
+  color: rgb(206, 59, 6);
+}
+
+.text-bold {
+  font-weight: 600;
+}

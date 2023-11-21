@@ -186,6 +186,7 @@ contract EventManagement {
         string calldata _description,
         bool _is_active,
         uint256 _ticket_price,
+        uint256 _eventStartTime,
         uint256 _eventEndTime
     ) external {
         Event storage updatedEvent = events[_id];
@@ -195,6 +196,7 @@ contract EventManagement {
         updatedEvent.is_active = _is_active;
         updatedEvent.ticket_price = _ticket_price;
         updatedEvent.eventEndTime = _eventEndTime;
+        updatedEvent.eventStartTime = _eventStartTime;
 
         emit EventUpdated(_id);
     }
