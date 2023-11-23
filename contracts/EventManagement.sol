@@ -84,7 +84,7 @@ contract EventManagement {
         newEvent.ticket_price = 0;
         newEvent.ticketCount = 0;
         newEvent.organizer = payable(msg.sender);
-        newEvent.eventStartTime = 999999999999;
+        newEvent.eventStartTime = 0;
         newEvent.eventEndTime = 999999999999;
 
         emit EventAdded(0);
@@ -116,10 +116,9 @@ contract EventManagement {
         uint256 _ticketCount,
         bool _is_active,
         uint256 _ticket_price,
-        uint256 _eventEndTime,
-        address payable _organizer
+        uint256 _eventEndTime
     ) external {
-        require(_organizer != address(0), "Invalid event organizer address");
+        require(msg.sender != address(0), "Invalid event organizer address");
 
         Event storage newEvent = events[_id];
         newEvent.id = _id;
@@ -129,7 +128,7 @@ contract EventManagement {
         newEvent.is_active = _is_active;
         newEvent.ticket_price = _ticket_price;
         newEvent.ticketCount = _ticketCount;
-        newEvent.organizer = _organizer;
+        newEvent.organizer = payable(msg.sender);
         newEvent.eventStartTime = this.getTodayUnixTimestamp();
         newEvent.eventEndTime = _eventEndTime;
 
@@ -272,6 +271,10 @@ contract EventManagement {
         return serviceProvider.totalAccumulatedFee;
     }
 
+    function setEventStartDate(uint256 _eventId, uint256 _eventStartTime) external {
+        events[_eventId].eventStartTime = _eventStartTime;
+    }
+
     // ===================== HELPERS =====================
 
     // calculates middle man's fee
@@ -304,3 +307,4 @@ contract EventManagement {
         return block.timestamp;
     }
 }
+
