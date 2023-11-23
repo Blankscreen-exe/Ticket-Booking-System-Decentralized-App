@@ -5,8 +5,8 @@
 import Web3 from 'web3';
 import EventManagementContract from './EventManagementContract.json'; // Replace with the actual path to your contract ABI file
 
-const web3 = new Web3('http://localhost:8545'); // Replace with your Ethereum node URL
-const contractAddress = '0x1234567890123456789012345678901234567890'; // Replace with your deployed contract address
+const web3 = new Web3('http://localhost:8545'); // Replace with .env value
+const contractAddress = '0x1234567890123456789012345678901234567890'; // Replace with .env value (related deployed contract address)
 
 
 const eventManagementContract = new web3.eth.Contract(
@@ -15,78 +15,207 @@ const eventManagementContract = new web3.eth.Contract(
   );
   
 // function to get the service provider's wallet address
-const getServiceProviderWallet = async () => {
-    try {
-        const serviceProviderWallet = await eventManagementContract.methods.getServiceProviderWallet().call();
-        console.log('Service Provider Wallet:', serviceProviderWallet);
-    } catch (error) {
-        console.error('Error:', error);
-    }
+export const getServiceProviderWallet = async () => {
+    const serviceProviderWallet = await eventManagementContract.methods.getServiceProviderWallet().call();
+    console.log('Service Provider Wallet:', serviceProviderWallet);
+    return serviceProviderWallet;
 };
 
 // function to add a new event
-const addEvent = async (
-    eventId, 
-    img_url, 
+export const addEvent = async ( 
+    imgUrl, 
     title, 
     description, 
     ticketCount, 
-    is_active, 
-    ticket_price, 
+    isActive, 
+    ticketPrice, 
+    eventStartTime, 
     eventEndTime, 
-    organizer, 
-    from, 
-    gas
+    organizer
 ) => {
-    try {
-        await eventManagementContract.methods.addEvent(
+    // get the latest event Id from the smart contract
+    let eventId = await getNextAvailableEventId();
+
+    // REVIEW: had a problem with using too many arguments for the addEvent() function therefore I'm calling update function as well which will add a eventStartDate to the event profile.
+    // create an event profile and register it to smart contract
+    await eventManagementContract.methods.addEvent({
+        eventId,
+        imgUrl,
+        title,
+        description,
+        ticketCount,
+        isActive,
+        ticketPrice,
+        eventEndTime: convertDateToTimestamp(eventEndTime),
+        organizer
+    })
+    .estimateGas({
+        from: walletAddress,
+        value: valueInWei,
+    })
+    .then(async (gasEstimate) => {
+        console.log('Gas Estimate:', gasEstimate);
+        
+        await eventManagementContract.methods.addEvent({
             eventId,
-            img_url,
+            imgUrl,
             title,
             description,
             ticketCount,
-            is_active,
-            ticket_price,
-            eventEndTime,
+            isActive,
+            ticketPrice,
+            eventEndTime: convertDateToTimestamp(eventEndTime),
             organizer
-        ).send({ from, gas }); // Replace with the sender's Ethereum address
+        })
+        .send({ 
+            organizer, 
+            gas: gasEstimate 
+        }) 
+        .on('confirmation', async function (confirmationNumber, receipt) {
+            // Confirmation callback
+            console.log('Confirmation Number:', confirmationNumber);
+            console.log('Receipt:', receipt);
 
-        console.log('Event added successfully!');
-    } catch (error) {
-        console.error('Error:', error);
-    }
+            await eventManagementContract.methods.setEventStartTime({
+                eventId, 
+                eventStartTime: convertDateToTimestamp(eventStartTime), 
+            })
+            .on('confirmation', function (confirmationNumber, receipt) {
+                console.log('Confirmation Number:', confirmationNumber);
+                console.log('Receipt:', receipt);
+            })
+            .on('error', function (error, receipt) {
+                console.error('Error:', error);
+                console.log('Receipt:', receipt);
+                return false;
+            });
+        })
+        .on('error', function (error, receipt) {
+            // Error callback
+            console.error('Error:', error);
+            console.log('Receipt:', receipt);
+            return false;
+        });
+    })
+
+    console.log('Event added successfully!');
+
+    return eventId;
 };
 
-const updateEventStatus = async (eventId) => {
-    try {
-        await eventManagementContract.methods.updateEventStatus(eventId);
-    } catch (e) {
-        throw e;
-    }
+export const updateEventStatus = async (eventId) => {
+    await eventManagementContract.methods.updateEventStatus({eventId})
+    .on('confirmation', function (confirmationNumber, receipt) {
+        console.log('Confirmation Number:', confirmationNumber);
+        console.log('Receipt:', receipt);
+    })
+    .on('error', function (error, receipt) {
+        console.error('Error:', error);
+        console.log('Receipt:', receipt);
+        return false;
+    });
 }
 
-const getLatestEventId = async () => {
-    let eventId = await eventManagementContract.methods.getLatestEventId();
+export const getLatestEventId = async () => {
+    let eventId = await eventManagementContract.methods.getLatestEventId()
+    .on('error', function (error, receipt) {
+        // Error callback
+        console.error('Error:', error);
+        console.log('Receipt:', receipt);
+        return false;
+    });
     return eventId;
 }
 
-const getNextAvailableEventId = async () => {
-    let eventId = await eventManagementContract.methods.getNextAvailableEventId();
+export const getNextAvailableEventId = async () => {
+    let eventId = await eventManagementContract.methods.getNextAvailableEventId()
+    .on('error', function (error, receipt) {
+        // Error callback
+        console.error('Error:', error);
+        console.log('Receipt:', receipt);
+        return false;
+    });
     return eventId;
 }
 
-const getEventDetails = async (eventId) => {
-    let eventDetails = eventManagementContract.methods.getEventDetails(eventId);
+export const getEventDetails = async (eventId) => {
+    let eventDetails = eventManagementContract.methods.getEventDetails(eventId)
+    .on('error', function (error, receipt) {
+        // Error callback
+        console.error('Error:', error);
+        console.log('Receipt:', receipt);
+        return false;
+    });
+    return eventDetails;
 }
 
-const updateEvent = async (eventId, imgUrl, title, description, isActive, ticketPrice, eventStartTime, eventEndTime) => {
-    eventManagementContract.methods.updateEvent(eventId, imgUrl, title, description, isActive, ticketPrice, eventStartTime, eventEndTime);
+export const updateEvent = async (eventId, imgUrl, title, description, isActive, ticketPrice, eventStartTime, eventEndTime) => {
+    eventManagementContract.methods.updateEvent({
+        eventId, 
+        imgUrl, 
+        title, 
+        description, 
+        isActive, 
+        ticketPrice, 
+        eventStartTime: convertDateToTimestamp(eventStartTime), 
+        eventEndTime: convertDateToTimestamp(eventEndTime)
+    })
+    .on('error', function (error, receipt) {
+        // Error callback
+        console.error('Error:', error);
+        console.log('Receipt:', receipt);
+
+        return false;
+    });
+
+    return true;
 }
 
-const addTickets = async (eventId, ticketsToAdd) => {
-    eventManagementContract.methods.addTickets(eventId, ticketsToAdd);
+export const addTickets = async (eventId, ticketsToAdd) => {
+    eventManagementContract.methods.addTickets({
+        eventId, 
+        ticketsToAdd
+    })
+    .on('error', function (error, receipt) {
+        // Error callback
+        console.error('Error:', error);
+        console.log('Receipt:', receipt);
+        return false;
+    });
+    return true;
 }
 
-const payForEvent = async (eventId) => {
-    eventManagementContract.methods.payForEvent(eventId);
+export const payForEvent = async (eventId, walletAddress, valueInWei) => {
+    // use wallet account with it
+    eventManagementContract.methods.payForEvent({eventId})
+    .estimateGas({
+        from: walletAddress,
+        value: valueInWei,
+    })
+    .then((gasEstimate) => {
+        console.log('Gas Estimate:', gasEstimate);
+
+        // Send transaction
+        eventManagementContract.methods.payForEvent(eventId)
+            .send({
+                from: walletAddress,
+                value: valueInWei,
+                gas: gasEstimate,
+            })
+            .on('transactionHash', function (hash) {
+                // Transaction hash callback
+                console.log('Transaction Hash:', hash);
+            })
+            .on('confirmation', function (confirmationNumber, receipt) {
+                console.log('Confirmation Number:', confirmationNumber);
+                console.log('Receipt:', receipt);
+            })
+            .on('error', function (error, receipt) {
+                console.error('Error:', error);
+                console.log('Receipt:', receipt);
+
+                return false;
+            });
+        });
+    return true;
 }
